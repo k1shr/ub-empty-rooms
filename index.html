@@ -77,7 +77,7 @@ $("room").onchange=$("batch").onchange=prefill;
 function store(){try{return JSON.parse(localStorage.getItem("fc")||"[]")}catch(e){return[]}}
 $("save").onclick=async()=>{const room=roomName(),batch=$("batch").value;
  if(!room){$("msg").textContent="Enter a valid UB room number (floors 5 to 14, e.g. 504 or 1230).";return}
- if(!batch){$("msg").textContent="Select your batch first.";return}
+ if(!batch){$("msg").textContent="Select your batch first.";return}  if(!/[12]/.test(grid)){$("msg").textContent="Your timetable grid is empty. Fill it in first (mark at least one cell Here or Not here).";return}
  const id=slug(room)+"__"+slug(batch),doc={room,batch,grid};
  try{if(db)await saveFloor(room,batch,grid);else{const s=store().filter(x=>x.id!==id);s.push({id,...doc});try{localStorage.setItem("fc",JSON.stringify(s))}catch(e){}docs=s;render()}
   $("msg").textContent="Saved ✓"}catch(e){$("msg").textContent="Could not save: "+(e.message||e.code||"not allowed")+". You may need edit access."}};
