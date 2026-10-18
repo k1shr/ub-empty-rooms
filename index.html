@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UB Free Classroom Finder</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#667085;--bd:#dfe3e8;--ac:#2563eb;--free:#16a34a;--busy:#dc2626;--away:#d97706;--fb:#dcfce7;--bb:#fee2e2;--ab:#fef3c7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--card:#181e26;--tx:#e8ecf1;--mu:#98a2b3;--bd:#2b3440;--ac:#60a5fa;--free:#4ade80;--busy:#f87171;--away:#fbbf24;--fb:#12351f;--bb:#3b1717;--ab:#3a2c0b}}
+:root[data-theme="dark"]{--bg:#0f1318;--card:#181e26;--tx:#e8ecf1;--mu:#98a2b3;--bd:#2b3440;--ac:#60a5fa;--free:#4ade80;--busy:#f87171;--away:#fbbf24;--fb:#12351f;--bb:#3b1717;--ab:#3a2c0b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0}h2{font-size:17px;margin:0 0 10px}p.s{color:var(--mu);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap}label{display:block;font-size:13px;color:var(--mu);margin-bottom:3px}
+input,select{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font:inherit;min-width:150px}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;cursor:pointer}button.g{background:transparent;color:var(--ac);border:1px solid var(--bd)}
+.sc{overflow-x:auto;margin-top:12px}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--bd);text-align:center;padding:0;font-size:12px}
+th{padding:5px 4px;background:var(--bg);color:var(--mu);font-weight:500;white-space:nowrap}th.d{text-align:left;padding:5px 8px}
+td.c{min-width:62px;height:38px;cursor:pointer;user-select:none}td.c[data-v="1"]{background:var(--bb);color:var(--busy)}td.c[data-v="2"]{background:var(--bg);color:var(--mu)}.pf{background:var(--bg);border:1px solid var(--bd);border-right:0;border-radius:8px 0 0 8px;padding:8px 10px;color:var(--mu)}#room{min-width:100px;border-radius:0 8px 8px 0}
+td.r{height:26px;min-width:34px}td.r.f{background:var(--fb)}td.r.b{background:var(--bb)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:var(--fb);color:var(--free);border:1px solid var(--free);border-radius:999px;padding:4px 12px;font-weight:600}
+.lg{font-size:13px;color:var(--mu);margin:6px 0}.lg b{padding:1px 7px;border-radius:5px}
+.bn{background:var(--ab);color:var(--away);padding:8px 12px;border-radius:8px;margin-bottom:14px;font-size:13px}
+.rm{margin-bottom:14px}.rm h3{font-size:15px;margin:0 0 4px}.rm small{color:var(--mu)}.msg{color:var(--free);margin-left:8px}
+</style></head><body><main>
+<h1>🏫 UB Free Classroom Finder</h1>
+<p class="s">University Building (UB) only. Add your timetable once; rooms where neither batch has a class turn green for everyone.</p>
+<div id="bn"></div>
+
+<div class="card"><h2>1. Find a free room</h2>
+<div class="row"><div><label>Day order</label><select id="fd"></select></div><div><label>Period</label><select id="fp"></select></div></div>
+<div style="margin-top:12px" class="chips" id="res"></div></div>
+
+<div class="card"><h2>2. Add / update your timetable</h2>
+<div class="row"><div><label>UB room number</label><div style="display:flex"><span class="pf">UB</span><input id="room" placeholder="e.g. 504" inputmode="numeric" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"></div></div>
+<div><label>Batch</label><select id="batch"><option value="" selected disabled>Select batch…</option><option>Batch 1</option><option>Batch 2</option></select></div></div>
+<div class="lg">Tap a cell to cycle: <b style="background:var(--bg)">empty</b> → <b style="background:var(--bb);color:var(--busy)">Here</b> (class in this room) → <b style="background:var(--bg)">Not here</b> (class elsewhere, e.g. lab). Empty and Not here both mean the room is free.</div>
+<div class="sc"><table id="grid"></table></div>
+<div style="margin-top:12px"><button id="save">Save timetable</button> <button class="g" id="clr">Clear grid</button><span class="msg" id="msg"></span></div></div>
+
+<div class="card"><h2>3. All rooms this week</h2><div class="lg"><b style="background:var(--fb);color:var(--free)">green</b> free &nbsp; <b style="background:var(--bb);color:var(--busy)">red</b> occupied</div><div id="all"></div></div>
+</main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getFirestore,doc as fbDoc,getDoc,setDoc,updateDoc,collection as fbCol,onSnapshot as fbSnap}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+/* PASTE YOUR FIREBASE CONFIG HERE (Firebase console > Project settings > Your apps) */
+const firebaseConfig={apiKey:"PASTE_HERE",authDomain:"PASTE_HERE",projectId:"PASTE_HERE",appId:"PASTE_HERE"};
+const fs=getFirestore(initializeApp(firebaseConfig));
+const shim={collection:n=>({doc:id=>{const r=fbDoc(fs,n,id);return{get:async()=>{const t=await getDoc(r);return{exists:t.exists()}},set:d=>setDoc(r,d),update:d=>updateDoc(r,d)}},onSnapshot:(a,b)=>fbSnap(fbCol(fs,n),a,b)})};
+const DAYS=5,P=[["8:00","8:50"],["8:50","9:40"],["9:45","10:35"],["10:40","11:30"],["11:30","12:20"],["12:30","1:20"],["1:25","2:15"],["2:20","3:10"],["3:10","4:00"]];
+const N=P.length,LBL=["—","Here","Not here"];
+const slug=s=>s.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+let grid="0".repeat(DAYS*N),docs=[],db=null,loaded="";
+const head=()=>'<tr><th></th>'+P.map((p,i)=>`<th>P${i+1}<br>${p[0]}–${p[1]}</th>`).join("")+'</tr>';
+function drawGrid(){let h=head();for(let d=0;d<DAYS;d++){h+=`<tr><th class="d">Day ${d+1}</th>`;for(let p=0;p<N;p++){const v=grid[d*N+p];h+=`<td class="c" data-i="${d*N+p}" data-v="${v}">${v==="0"?"":LBL[v]}</td>`}h+="</tr>"}$("grid").innerHTML=h}
+$("grid").onclick=e=>{const t=e.target.closest("td.c");if(!t)return;const i=+t.dataset.i,v=(+grid[i]+1)%3;grid=grid.slice(0,i)+v+grid.slice(i+1);t.dataset.v=v;t.textContent=v?LBL[v]:""};
+$("clr").onclick=()=>{grid="0".repeat(DAYS*N);drawGrid()};
+function rooms(){const m={};docs.forEach(x=>{const k=slug(x.room);(m[k]=m[k]||{name:x.room,b:[]}).b.push(x)});return m}
+const busy=(r,i)=>r.b.some(x=>x.grid[i]==="1");
+function render(){
+ const R=rooms(),keys=Object.keys(R).sort(),d=+$("fd").value,p=+$("fp").value;
+ const free=keys.filter(k=>!busy(R[k],d*N+p));
+ $("res").innerHTML=!keys.length?'<span class="lg">No timetables added yet — be the first!</span>':free.length?free.map(k=>`<span class="chip">${esc(R[k].name)}</span>`).join(""):'<span class="lg">No free rooms in this slot.</span>';
+ $("all").innerHTML=keys.map(k=>{const r=R[k];let t=head();for(let i=0;i<DAYS;i++){t+=`<tr><th class="d">Day ${i+1}</th>`;for(let j=0;j<N;j++)t+=`<td class="r ${busy(r,i*N+j)?"b":"f"}"></td>`;t+="</tr>"}
+  return `<div class="rm"><h3>${esc(r.name)} <small>based on: ${r.b.map(x=>esc(x.batch)).join(", ")}</small></h3><div class="sc"><table>${t}</table></div></div>`}).join("")||'<span class="lg">Nothing yet.</span>'}
+function fill(){$("fd").innerHTML=[...Array(DAYS)].map((_,i)=>`<option value="${i}">Day ${i+1}</option>`).join("");
+ $("fp").innerHTML=P.map((p,i)=>`<option value="${i}">P${i+1} (${p[0]}–${p[1]})</option>`).join("");
+ const n=new Date(),m=n.getHours()*60+n.getMinutes(),st=[480,530,585,640,690,750,805,860,910];let c=0;st.forEach((s,i)=>{if(m>=s)c=i});$("fp").value=Math.min(c,N-1);
+ $("fd").onchange=$("fp").onchange=render}
+const parse=ds=>{const o=[];ds.forEach(d=>{const x=d.data()||{};for(const k in x){const m=/^r(\d{3,4})b([12])$/.exec(k);if(m&&typeof x[k]==="string"&&/^[012]{45}$/.test(x[k]))o.push({id:"ub-"+m[1]+"__batch-"+m[2],room:"UB "+m[1],batch:"Batch "+m[2],grid:x[k]})}});return o};
+const saveFloor=async(room,batch,g)=>{const num=room.slice(3),key="r"+num+"b"+batch.slice(-1),ref=db.collection("floors").doc("floor-"+num.slice(0,-2)),p={k:key,[key]:g};const s=await ref.get();if(s.exists)await ref.update(p);else await ref.set(p)};
+const roomName=()=>{const v=$("room").value.trim().replace(/^ub[\s-]*/i,"");return /^([5-9]|1[0-4])([0-3][0-9]|40)$/.test(v)?"UB "+v:""};
+function prefill(){const k=slug(roomName())+"__"+slug($("batch").value);if(k===loaded)return;loaded=k;const x=docs.find(d=>d.id===k);if(x){grid=x.grid;drawGrid()}}
+$("room").onchange=$("batch").onchange=prefill;
+function store(){try{return JSON.parse(localStorage.getItem("fc")||"[]")}catch(e){return[]}}
+$("save").onclick=async()=>{const room=roomName(),batch=$("batch").value;
+ if(!room){$("msg").textContent="Enter a valid UB room number (floors 5 to 14, e.g. 504 or 1230).";return}
+ if(!batch){$("msg").textContent="Select your batch first.";return}
+ const id=slug(room)+"__"+slug(batch),doc={room,batch,grid};
+ try{if(db)await saveFloor(room,batch,grid);else{const s=store().filter(x=>x.id!==id);s.push({id,...doc});try{localStorage.setItem("fc",JSON.stringify(s))}catch(e){}docs=s;render()}
+  $("msg").textContent="Saved ✓"}catch(e){$("msg").textContent="Could not save: "+(e.message||e.code||"not allowed")+". You may need edit access."}};
+fill();drawGrid();render();
+(async()=>{try{db=shim}catch(e){}
+ if(!db){$("bn").innerHTML='<div class="bn">Offline mode: data is saved only in this browser. Sign in on claude.ai to share with everyone.</div>';docs=store();render();return}
+ db.collection("floors").onSnapshot(s=>{docs=parse(s.docs).filter(x=>x.grid&&x.grid.length===DAYS*N&&/^UB (([5-9]|1[0-4])([0-3][0-9]|40))$/.test(x.room));render()},e=>{$("bn").innerHTML='<div class="bn">Could not load shared data ('+esc(e.code||"error")+').</div>'})})();
+</script></body></html>
