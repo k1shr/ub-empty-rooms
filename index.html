@@ -67,7 +67,7 @@ function render(){
   return `<div class="rm"><h3>${esc(r.name)} <small>${both(r)?"✓ both batches added":"⚠ waiting for "+[1,2].filter(n=>!r.b.some(x=>x.batch==="Batch "+n)).map(n=>"Batch "+n).join(" & ")}</small></h3><div class="sc"><table>${t}</table></div></div>`}).join("")||'<span class="lg">Nothing yet.</span>'}
 function fill(){$("fd").innerHTML=[...Array(DAYS)].map((_,i)=>`<option value="${i}">Day ${i+1}</option>`).join("");
  $("fp").innerHTML=P.map((p,i)=>`<option value="${i}">P${i+1} (${p[0]}–${p[1]})</option>`).join("");
- const n=new Date(),m=n.getHours()*60+n.getMinutes(),st=[480,530,585,640,690,750,805,860,910];let c=0;st.forEach((s,i)=>{if(m>=s)c=i});$("fp").value=Math.min(c,N-1);
+ const n=new Date(),m=n.getHours()*60+n.getMinutes(),st=[480,530,585,640,690,750,805,860,910,960];let c=0;st.forEach((s,i)=>{if(m>=s)c=i});$("fp").value=Math.min(c,N-1);
  $("fd").onchange=$("fp").onchange=render}
 const parse=ds=>{const o=[];ds.forEach(d=>{const x=d.data()||{};for(const k in x){const m=/^r(\d{3,4})b([12])$/.exec(k);if(m&&typeof x[k]==="string"&&/^[012]{45}$/.test(x[k]))o.push({id:"ub-"+m[1]+"__batch-"+m[2],room:"UB "+m[1],batch:"Batch "+m[2],grid:x[k]})}});return o};
 const saveFloor=async(room,batch,g)=>{const num=room.slice(3),key="r"+num+"b"+batch.slice(-1),ref=db.collection("floors").doc("floor-"+num.slice(0,-2)),p={k:key,[key]:g};const s=await ref.get();if(s.exists)await ref.update(p);else await ref.set(p)};
