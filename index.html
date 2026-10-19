@@ -69,7 +69,7 @@ function fill(){$("fd").innerHTML=[...Array(DAYS)].map((_,i)=>`<option value="${
  $("fp").innerHTML=P.map((p,i)=>`<option value="${i}">P${i+1} (${p[0]}–${p[1]})</option>`).join("");
  const n=new Date(),m=n.getHours()*60+n.getMinutes(),st=[480,530,585,640,690,750,805,860,910,960];let c=0;st.forEach((s,i)=>{if(m>=s)c=i});$("fp").value=Math.min(c,N-1);
  $("fd").onchange=$("fp").onchange=render}
-const parse=ds=>{const o=[];ds.forEach(d=>{const x=d.data()||{};for(const k in x){const m=/^r(\d{3,4})b([12])$/.exec(k);if(m&&typeof x[k]==="string"&&/^[012]{45}$/.test(x[k]))o.push({id:"ub-"+m[1]+"__batch-"+m[2],room:"UB "+m[1],batch:"Batch "+m[2],grid:x[k]})}});return o};
+const parse=ds=>{const o=[];ds.forEach(d=>{const x=d.data()||{};for(const k in x){const m=/^r(\d{3,4})b([12])$/.exec(k);if(m&&typeof x[k]==="string"&&/^[012]{45}$|^[012]{50}$/.test(x[k]))o.push({id:"ub-"+m[1]+"__batch-"+m[2],room:"UB "+m[1],batch:"Batch "+m[2],grid:x[k].length===45?x[k].replace(/(.{9})/g,a=>a+"0"):x[k]})}});return o};
 const saveFloor=async(room,batch,g)=>{const num=room.slice(3),key="r"+num+"b"+batch.slice(-1),ref=db.collection("floors").doc("floor-"+num.slice(0,-2)),p={k:key,[key]:g};const s=await ref.get();if(s.exists)await ref.update(p);else await ref.set(p)};
 const roomName=()=>{const v=$("room").value.trim().replace(/^ub[\s-]*/i,"");return /^([5-9]|1[0-4])([0-3][0-9]|40)$/.test(v)?"UB "+v:""};
 function prefill(){const k=slug(roomName())+"__"+slug($("batch").value);if(k===loaded)return;loaded=k;const x=docs.find(d=>d.id===k);if(x){grid=x.grid;drawGrid()}}
