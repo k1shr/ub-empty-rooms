@@ -77,7 +77,7 @@ $("room").onchange=$("batch").onchange=prefill;
 function store(){try{return JSON.parse(localStorage.getItem("fc")||"[]")}catch(e){return[]}}
 $("save").onclick=async()=>{const room=roomName(),batch=$("batch").value;
  if(!room){$("msg").textContent="Enter a valid UB room number (floors 5 to 14, e.g. 504 or 1230).";return}
- if(!batch){$("msg").textContent="Select your batch first.";return}  if(!/[12]/.test(grid)){$("msg").textContent="Your timetable grid is empty. Fill it in first (mark at least one cell Here or Not here).";return}  if(!window.langOk){window.langOk=1;$("msg").textContent="Check your language classes, then click Save timetable again.";alert("Language classes reminder:
+ if(!batch){$("msg").textContent="Select your batch first.";return}  if(!/[12]/.test(grid)){$("msg").textContent="Your timetable grid is empty. Fill it in first (mark at least one cell Here or Not here).";return}  if(!window.langOk){window.langOk=1;$("msg").textContent="Check your language classes, then click Save timetable again.";alert(`Language classes reminder:
 
 If you attend a language class in room "+room+", mark those periods as Here.
 If your language class is in a different room, add that room's timetable too and mark Here for those periods.
