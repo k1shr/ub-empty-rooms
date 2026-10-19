@@ -82,7 +82,7 @@ $("save").onclick=async()=>{const room=roomName(),batch=$("batch").value;
 If you attend a language class in room ${room}, mark those periods as Here.
 If your language class is in a different room, add that room's timetable too and mark Here for those periods.
 
-Press OK, check your grid, then click Save timetable again.");return}  window.langOk=0;
+Press OK, check your grid, then click Save timetable again.`);return}  window.langOk=0;
  const id=slug(room)+"__"+slug(batch),doc={room,batch,grid};
  try{if(db)await saveFloor(room,batch,grid);else{const s=store().filter(x=>x.id!==id);s.push({id,...doc});try{localStorage.setItem("fc",JSON.stringify(s))}catch(e){}docs=s;render()}
   $("msg").textContent="Saved ✓"}catch(e){$("msg").textContent="Could not save: "+(e.message||e.code||"not allowed")+". You may need edit access."}};
