@@ -60,7 +60,7 @@ $("clr").onclick=()=>{grid="0".repeat(DAYS*N);drawGrid()};
 function rooms(){const m={};docs.forEach(x=>{const k=slug(x.room);(m[k]=m[k]||{name:x.room,b:[]}).b.push(x)});return m}
 const busy=(r,i)=>r.b.some(x=>x.grid[i]==="1");
 function render(){
- const R=rooms(),keys=Object.keys(R).sort(),d=+$("fd").value,p=+$("fp").value;
+ const R=rooms(),keys=Object.keys(R).sort((a,b)=>parseInt(a.slice(3))-parseInt(b.slice(3))),d=+$("fd").value,p=+$("fp").value;
  const both=r=>r.b.some(x=>x.batch==="Batch 1")&&r.b.some(x=>x.batch==="Batch 2");  const free=keys.filter(k=>both(R[k])&&!busy(R[k],d*N+p));const maybe=keys.filter(k=>!both(R[k])&&!busy(R[k],d*N+p));
  $("res").innerHTML=!keys.length?'<span class="lg">No timetables added yet — be the first!</span>':free.length?free.map(k=>`<span class="chip">${esc(R[k].name)}</span>`).join(""):'<span class="lg">No confirmed free rooms in this slot.</span>';
  if(maybe.length)$("res").innerHTML+='<div class="lg" style="width:100%">Maybe free (the other batch has not added theirs yet, check in person):</div>'+maybe.map(k=>`<span class="chip mb">${esc(R[k].name)} <small>needs ${[1,2].filter(n=>!R[k].b.some(x=>x.batch==="Batch "+n)).map(n=>"B"+n).join("&")}</small></span>`).join("");  const ordered=[...keys.filter(k=>both(R[k])),...keys.filter(k=>!both(R[k]))];  $("all").innerHTML=ordered.map(k=>{const r=R[k];let t=head();for(let i=0;i<DAYS;i++){t+=`<tr><th class="d">Day ${i+1}</th>`;for(let j=0;j<N;j++)t+=`<td class="r ${busy(r,i*N+j)?"b":"f"}${both(r)?"":" w"}"></td>`;t+="</tr>"}
