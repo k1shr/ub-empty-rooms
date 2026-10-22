@@ -21,7 +21,7 @@ td.r{height:26px;min-width:34px}td.r.f{background:var(--fb)}td.r.b{background:va
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:var(--fb);color:var(--free);border:1px solid var(--free);border-radius:999px;padding:4px 12px;font-weight:600}
 .lg{font-size:13px;color:var(--mu);margin:6px 0}.lg b{padding:1px 7px;border-radius:5px}
 .bn{background:var(--ab);color:var(--away);padding:8px 12px;border-radius:8px;margin-bottom:14px;font-size:13px}
-.chip.mb{background:var(--ab);color:var(--away);border-color:var(--away)}td.r.w{opacity:.5} .rm{margin-bottom:14px}.rm h3{font-size:15px;margin:0 0 4px}.rm small{color:var(--mu)}.msg{color:var(--free);margin-left:8px}
+.chip.mb{background:var(--ab);color:var(--away);border-color:var(--away)}td.r.w{opacity:.5} .ft{text-align:center;color:var(--mu);font-size:13px;margin:24px 0 8px}.ft a{color:var(--ac)} .rm{margin-bottom:14px}.rm h3{font-size:15px;margin:0 0 4px}.rm small{color:var(--mu)}.msg{color:var(--free);margin-left:8px}
 </style></head><body><main>
 <h1>🏫 UB Free Classroom Finder</h1>
 <p class="s">University Building (UB) only. Add your timetable once; rooms where neither batch has a class turn green for everyone.</p>
@@ -39,7 +39,7 @@ td.r{height:26px;min-width:34px}td.r.f{background:var(--fb)}td.r.b{background:va
 <div style="margin-top:12px"><button id="save">Save timetable</button> <button class="g" id="clr">Clear grid</button><span class="msg" id="msg"></span></div></div>
 
 <div class="card"><h2>3. All rooms this week</h2><div class="lg"><b style="background:var(--fb);color:var(--free)">green</b> free &nbsp; <b style="background:var(--bb);color:var(--busy)">red</b> occupied &nbsp; Faded = not confirmed, the other batch has not added theirs</div><div id="all"></div></div>
-</main>
+<footer class="ft">Made with ❤️ by <a href="https://github.com/k1shr" target="_blank" rel="noopener">Kishore</a> · he's from 510 btw <br>Built by someone who also couldn't find a free room</footer> </main>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getFirestore,doc as fbDoc,getDoc,setDoc,updateDoc,collection as fbCol,onSnapshot as fbSnap}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
