@@ -16,78 +16,131 @@ input,select{background:var(--bg);color:var(--tx);border:1px solid var(--bd);bor
 button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;cursor:pointer}button.g{background:transparent;color:var(--ac);border:1px solid var(--bd)}
 .sc{overflow-x:auto;margin-top:12px}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--bd);text-align:center;padding:0;font-size:12px}
 th{padding:5px 4px;background:var(--bg);color:var(--mu);font-weight:500;white-space:nowrap}th.d{text-align:left;padding:5px 8px}
-td.c{min-width:62px;height:38px;cursor:pointer;user-select:none}td.c[data-v="1"]{background:var(--bb);color:var(--busy)}td.c[data-v="2"]{background:var(--bg);color:var(--mu)}.pf{background:var(--bg);border:1px solid var(--bd);border-right:0;border-radius:8px 0 0 8px;padding:8px 10px;color:var(--mu)}#room{min-width:100px;border-radius:0 8px 8px 0}
+td.c{min-width:62px;height:38px;cursor:pointer;user-select:none}td.c[data-v="1"]{background:var(--bb);color:var(--busy)}td.c[data-v="2"]{background:var(--bg);color:var(--mu)}.pf{background:var(--bg);border:1px solid var(--bd);border-right:0;border-radius:8px 0 0 8px;padding:8px 10px;color:var(--mu)}#room,#rroom{min-width:100px;border-radius:0 8px 8px 0}
 td.r{height:26px;min-width:34px}td.r.f{background:var(--fb)}td.r.b{background:var(--bb)}td.r.u{background:var(--bd);opacity:.5}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:var(--fb);color:var(--free);border:1px solid var(--free);border-radius:999px;padding:4px 12px;font-weight:600}
 .lg{font-size:13px;color:var(--mu);margin:6px 0}.lg b{padding:1px 7px;border-radius:5px}
 .bn{background:var(--ab);color:var(--away);padding:8px 12px;border-radius:8px;margin-bottom:14px;font-size:13px}
 .chip.mb{background:var(--ab);color:var(--away);border-color:var(--away)}td.r.w{opacity:.5} .ft{text-align:center;color:var(--mu);font-size:13px;margin:24px 0 8px}.ft a{color:var(--ac)} .rm{margin-bottom:14px}.rm h3{font-size:15px;margin:0 0 4px}.rm small{color:var(--mu)}.msg{color:var(--free);margin-left:8px}
+.chip.cf{background:var(--free);color:#fff;border-color:var(--free);box-shadow:0 0 0 3px rgba(34,197,94,.3),0 0 14px rgba(34,197,94,.55)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip.cf{color:#052e14}}:root[data-theme="dark"] .chip.cf{color:#052e14}
+.gl{width:100%;font-size:13px;color:var(--mu);margin:10px 0 2px}.gl b{color:var(--tx)}
+td.r.s{background:var(--free)}
 </style></head><body><main>
 <h1>🏫 UB Free Classroom Finder</h1>
-<p class="s">University Building (UB) only. Add your timetable once; rooms where neither batch has a class turn green for everyone.</p>
+<p class="s">University Building (UB) only. Add your timetable once, or mark a room you've seen empty. Free rooms turn green for everyone.</p>
 <div id="bn"></div>
 
 <div class="card"><h2>1. Find a free room</h2>
 <div class="row"><div><label>Day order</label><select id="fd"></select></div><div><label>Period</label><select id="fp"></select></div></div>
 <div style="margin-top:12px" class="chips" id="res"></div></div>
 
-<div class="card"><h2>2. Add / update your timetable</h2>
+<div class="card"><h2>2. Saw an empty room? Mark it</h2>
+<p class="s" style="margin-bottom:10px">Checked in person that a room is empty? Mark it here and it shows up as confirmed for everyone.</p>
+<div class="row"><div><label>UB room number</label><div style="display:flex"><span class="pf">UB</span><input id="rroom" placeholder="e.g. 504" inputmode="numeric" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"></div></div>
+<div><label>Day order</label><select id="rd"></select></div><div><label>Period</label><select id="rpd"></select></div></div>
+<div style="margin-top:12px"><button id="rsave">Mark as empty</button><button class="g" id="rdel" hidden>Remove mark</button><span class="msg" id="rmsg"></span></div></div>
+
+<div class="card"><h2>3. Add / update your timetable</h2>
 <div class="row"><div><label>UB room number</label><div style="display:flex"><span class="pf">UB</span><input id="room" placeholder="e.g. 504" inputmode="numeric" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')"></div></div>
-<div><label>Batch</label><select id="batch"><option value="" selected disabled>Select batch…</option><option>Batch 1</option><option>Batch 2</option></select></div></div>
+<div><label>Batch</label><select id="batch"><option value="" selected disabled>Select batch…</option><option value="1">Batch 1</option><option value="2">Batch 2</option></select></div></div>
 <div class="lg">Tap a cell to cycle: <b style="background:var(--bg)">empty</b> → <b style="background:var(--bb);color:var(--busy)">Here</b> (class in this room) → <b style="background:var(--bg)">Not here</b> (class elsewhere, e.g. lab). Empty and Not here both mean the room is free.</div>
 <div class="sc"><table id="grid"></table></div>
 <div style="margin-top:12px"><button id="save">Save timetable</button> <button class="g" id="clr">Clear grid</button><span class="msg" id="msg"></span></div></div>
 
-<div class="card"><h2>3. All rooms this week</h2><div class="lg"><b style="background:var(--fb);color:var(--free)">green</b> free &nbsp; <b style="background:var(--bb);color:var(--busy)">red</b> occupied &nbsp; Faded = not confirmed, the other batch has not added theirs</div><div id="all"></div></div>
+<div class="card"><h2>4. All rooms this week</h2><div class="lg"><b style="background:var(--free);color:#fff">green</b> confirmed empty &nbsp; <b style="background:var(--fb);color:var(--free)">light green</b> free per timetables &nbsp; <b style="background:var(--bb);color:var(--busy)">red</b> occupied &nbsp; <b style="background:var(--bd)">grey</b> unknown &nbsp; Faded = the other batch has not added theirs</div><div id="all"></div></div>
 <footer class="ft">Made with ❤️ by <a href="https://github.com/k1shr" target="_blank" rel="noopener">kishore</a> · he's from 510 btw <br>Built by someone who also couldn't find a free room</footer> </main>
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getFirestore,doc as fbDoc,getDoc,setDoc,updateDoc,collection as fbCol,onSnapshot as fbSnap}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-/* PASTE YOUR FIREBASE CONFIG HERE (Firebase console > Project settings > Your apps) */
+const APP="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",FST="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyA3KggG2ex59jYVLtTU_L9qLynnwui6YEA",authDomain:"ub-empty-rooms.firebaseapp.com",projectId:"ub-empty-rooms",appId:"1:701727635058:web:391040bdbf89f98a7cb4eb"};
-const fs=getFirestore(initializeApp(firebaseConfig));
-const shim={collection:n=>({doc:id=>{const r=fbDoc(fs,n,id);return{get:async()=>{const t=await getDoc(r);return{exists:t.exists()}},set:d=>setDoc(r,d),update:d=>updateDoc(r,d)}},onSnapshot:(a,b)=>fbSnap(fbCol(fs,n),a,b)})};
+
 const DAYS=5,P=[["8:00","8:50"],["8:50","9:40"],["9:45","10:35"],["10:40","11:30"],["11:30","12:20"],["12:30","1:20"],["1:25","2:15"],["2:20","3:10"],["3:10","4:00"],["4:00","4:50"]];
-const N=P.length,LBL=["—","Here","Not here"];
-const slug=s=>s.trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const N=P.length,START=[480,530,585,640,690,750,805,860,910,960],LBL=["","Here","Not here"];
+const ROOM=/^([5-9]|1[0-4])([0-3][0-9]|40)$/;
 const $=id=>document.getElementById(id);
-let grid="0".repeat(DAYS*N),docs=[],db=null,loaded="";
+let grid="0".repeat(DAYS*N),docs=[],reps={},db=null,loaded="",langOk=false;
+
+/* ---------- data ----------
+   Each Firestore doc floors/floor-N holds:
+   r504b1 / r504b2 : timetable per batch, 50 chars (0 none, 1 here, 2 not here)
+   r504c           : confirmed-empty marks, 50 chars (1 = checked empty in person) */
+function parse(ds){const tt=[],rp={};
+ ds.forEach(d=>{const x=d.data()||{};for(const k in x){const v=x[k];if(typeof v!=="string")continue;let m;
+  if((m=/^r(\d{3,4})b([12])$/.exec(k))&&ROOM.test(m[1])&&/^([012]{45}|[012]{50})$/.test(v))
+   tt.push({room:m[1],batch:m[2],grid:v.length===45?v.replace(/(.{9})/g,a=>a+"0"):v});
+  else if((m=/^r(\d{3,4})c$/.exec(k))&&ROOM.test(m[1])&&/^[01]{50}$/.test(v))rp[m[1]]=v}});
+ docs=tt;reps=rp}
+function rooms(){const m={},mk=n=>m[n]=m[n]||{b:{},c:""};docs.forEach(x=>mk(x.room).b[x.batch]=x.grid);for(const n in reps)mk(n).c=reps[n];return m}
+const busy=(r,i)=>Object.values(r.b).some(g=>g[i]==="1");
+// confirmed in person wins; then a timetable class; then both batches free; then one batch only
+const state=(r,i)=>r.c[i]==="1"?"s":busy(r,i)?"b":r.b[1]&&r.b[2]?"f":Object.keys(r.b).length?"w":"u";
+async function saveKey(num,key,v){const ref=db.doc(db.fs,"floors","floor-"+num.slice(0,-2)),p={k:key,[key]:v};
+ (await db.getDoc(ref)).exists()?await db.updateDoc(ref,p):await db.setDoc(ref,p)}
+const roomNum=id=>{const v=$(id).value.trim();return ROOM.test(v)?v:""};
+const BADROOM="Enter a UB room number like 504 or 1230 (floors 5 to 14).";
+
+/* ---------- find ---------- */
 const head=()=>'<tr><th></th>'+P.map((p,i)=>`<th>P${i+1}<br>${p[0]}–${p[1]}</th>`).join("")+'</tr>';
-function drawGrid(){let h=head();for(let d=0;d<DAYS;d++){h+=`<tr><th class="d">Day ${d+1}</th>`;for(let p=0;p<N;p++){const v=grid[d*N+p];h+=`<td class="c" data-i="${d*N+p}" data-v="${v}">${v==="0"?"":LBL[v]}</td>`}h+="</tr>"}$("grid").innerHTML=h}
-$("grid").onclick=e=>{const t=e.target.closest("td.c");if(!t)return;const i=+t.dataset.i,v=(+grid[i]+1)%3;grid=grid.slice(0,i)+v+grid.slice(i+1);t.dataset.v=v;t.textContent=v?LBL[v]:""};
-$("clr").onclick=()=>{grid="0".repeat(DAYS*N);drawGrid()};
-function rooms(){const m={};docs.forEach(x=>{const k=slug(x.room);(m[k]=m[k]||{name:x.room,b:[]}).b.push(x)});return m}
-const busy=(r,i)=>r.b.some(x=>x.grid[i]==="1");
+const need=r=>[1,2].filter(n=>!r.b[n]);
 function render(){
- const R=rooms(),keys=Object.keys(R).sort((a,b)=>parseInt(a.slice(3))-parseInt(b.slice(3))),d=+$("fd").value,p=+$("fp").value;
- const both=r=>r.b.some(x=>x.batch==="Batch 1")&&r.b.some(x=>x.batch==="Batch 2");  const free=keys.filter(k=>both(R[k])&&!busy(R[k],d*N+p));const maybe=keys.filter(k=>!both(R[k])&&!busy(R[k],d*N+p));
- $("res").innerHTML=!keys.length?'<span class="lg">No timetables added yet — be the first!</span>':free.length?free.map(k=>`<span class="chip">${esc(R[k].name)}</span>`).join(""):'<span class="lg">No confirmed free rooms in this slot.</span>';
- if(maybe.length)$("res").innerHTML+='<div class="lg" style="width:100%">Maybe free (the other batch has not added theirs yet, check in person):</div>'+maybe.map(k=>`<span class="chip mb">${esc(R[k].name)} <small>needs ${[1,2].filter(n=>!R[k].b.some(x=>x.batch==="Batch "+n)).map(n=>"B"+n).join("&")}</small></span>`).join("");  const ordered=[...keys.filter(k=>both(R[k])),...keys.filter(k=>!both(R[k]))];  $("all").innerHTML=ordered.map(k=>{const r=R[k];let t=head();for(let i=0;i<DAYS;i++){t+=`<tr><th class="d">Day ${i+1}</th>`;for(let j=0;j<N;j++)t+=`<td class="r ${busy(r,i*N+j)?"b":"f"}${both(r)?"":" w"}"></td>`;t+="</tr>"}
-  return `<div class="rm"><h3>${esc(r.name)} <small>${both(r)?"✓ both batches added":"⚠ may be wrong, waiting for "+[1,2].filter(n=>!r.b.some(x=>x.batch==="Batch "+n)).map(n=>"Batch "+n).join(" & ")}</small></h3><div class="sc"><table>${t}</table></div></div>`}).join("")||'<span class="lg">Nothing yet.</span>'}
-function fill(){$("fd").innerHTML=[...Array(DAYS)].map((_,i)=>`<option value="${i}">Day ${i+1}</option>`).join("");
- $("fp").innerHTML=P.map((p,i)=>`<option value="${i}">P${i+1} (${p[0]}–${p[1]})</option>`).join("");
- const n=new Date(),m=n.getHours()*60+n.getMinutes(),st=[480,530,585,640,690,750,805,860,910,960];let c=0;st.forEach((s,i)=>{if(m>=s)c=i});$("fp").value=Math.min(c,N-1);
- $("fd").onchange=$("fp").onchange=render}
-const parse=ds=>{const o=[];ds.forEach(d=>{const x=d.data()||{};for(const k in x){const m=/^r(\d{3,4})b([12])$/.exec(k);if(m&&typeof x[k]==="string"&&/^[012]{45}$|^[012]{50}$/.test(x[k]))o.push({id:"ub-"+m[1]+"__batch-"+m[2],room:"UB "+m[1],batch:"Batch "+m[2],grid:x[k].length===45?x[k].replace(/(.{9})/g,a=>a+"0"):x[k]})}});return o};
-const saveFloor=async(room,batch,g)=>{const num=room.slice(3),key="r"+num+"b"+batch.slice(-1),ref=db.collection("floors").doc("floor-"+num.slice(0,-2)),p={k:key,[key]:g};const s=await ref.get();if(s.exists)await ref.update(p);else await ref.set(p)};
-const roomName=()=>{const v=$("room").value.trim().replace(/^ub[\s-]*/i,"");return /^([5-9]|1[0-4])([0-3][0-9]|40)$/.test(v)?"UB "+v:""};
-function prefill(){const k=slug(roomName())+"__"+slug($("batch").value);if(k===loaded)return;loaded=k;const x=docs.find(d=>d.id===k);if(x){grid=x.grid;drawGrid()}}
+ const R=rooms(),ks=Object.keys(R).sort((a,b)=>a-b),i=+$("fd").value*N+ +$("fp").value,g={s:[],f:[],w:[]};
+ ks.forEach(k=>{const s=state(R[k],i);if(g[s])g[s].push(k)});
+ let h="";
+ if(g.s.length)h+='<div class="gl"><b>Confirmed empty</b> · checked in person by students, these are certain</div>'+g.s.map(k=>`<span class="chip cf">UB ${k}</span>`).join("");
+ if(g.f.length)h+='<div class="gl"><b>Free per timetables</b> · a language class might still be there</div>'+g.f.map(k=>`<span class="chip">UB ${k}</span>`).join("");
+ if(g.w.length)h+='<div class="gl">Maybe free (the other batch has not added theirs yet, check in person):</div>'+g.w.map(k=>`<span class="chip mb">UB ${k} <small>needs ${need(R[k]).map(n=>"B"+n).join("&")}</small></span>`).join("");
+ $("res").innerHTML=!ks.length?'<span class="lg">No rooms added yet — be the first!</span>':h||'<span class="lg">No free rooms found in this slot.</span>';
+ const cls={s:"s",b:"b",f:"f",w:"f w",u:"u"};
+ const both=r=>r.b[1]&&r.b[2],ordered=[...ks.filter(k=>both(R[k])),...ks.filter(k=>!both(R[k]))];
+ $("all").innerHTML=ordered.map(k=>{const r=R[k];let t=head();
+  for(let d=0;d<DAYS;d++){t+=`<tr><th class="d">Day ${d+1}</th>`;for(let j=0;j<N;j++)t+=`<td class="r ${cls[state(r,d*N+j)]}"></td>`;t+="</tr>"}
+  const note=both(r)?"✓ both batches added":!Object.keys(r.b).length?"only in-person marks so far":"⚠ may be wrong, waiting for "+need(r).map(n=>"Batch "+n).join(" & ");
+  return `<div class="rm"><h3>UB ${k} <small>${note}</small></h3><div class="sc"><table>${t}</table></div></div>`}).join("")||'<span class="lg">Nothing yet.</span>';
+ rstat()}
+
+/* ---------- confirmed empty ---------- */
+const rslot=()=>+$("rd").value*N+ +$("rpd").value;
+function rstat(){const n=roomNum("rroom"),on=!!n&&(reps[n]||"")[rslot()]==="1";$("rdel").hidden=!on;$("rsave").hidden=on;
+ if(on&&!$("rmsg").textContent)$("rmsg").textContent="Already marked empty for this period."}
+$("rroom").addEventListener("input",()=>{$("rmsg").textContent="";rstat()});
+$("rd").onchange=$("rpd").onchange=()=>{$("rmsg").textContent="";rstat()};
+async function mark(val){const n=roomNum("rroom");
+ if(!n)return $("rmsg").textContent=BADROOM;
+ if(!db)return $("rmsg").textContent="Not connected. Try again in a bit.";
+ const i=rslot(),cur=reps[n]||"0".repeat(DAYS*N),v=cur.slice(0,i)+val+cur.slice(i+1);
+ try{await saveKey(n,"r"+n+"c",v);reps[n]=v;rstat();
+  $("rmsg").textContent=val==="1"?`Saved ✓ UB ${n} now shows as confirmed empty.`:"Mark removed."}
+ catch(e){$("rmsg").textContent="Couldn't save ("+(e.code||e.message)+")."}}
+$("rsave").onclick=()=>mark("1");$("rdel").onclick=()=>mark("0");
+
+/* ---------- timetable ---------- */
+function drawGrid(){let h=head();for(let d=0;d<DAYS;d++){h+=`<tr><th class="d">Day ${d+1}</th>`;for(let p=0;p<N;p++){const v=grid[d*N+p];h+=`<td class="c" data-i="${d*N+p}" data-v="${v}">${LBL[v]}</td>`}h+="</tr>"}$("grid").innerHTML=h}
+$("grid").onclick=e=>{const t=e.target.closest("td.c");if(!t)return;const i=+t.dataset.i,v=(+grid[i]+1)%3;grid=grid.slice(0,i)+v+grid.slice(i+1);t.dataset.v=v;t.textContent=LBL[v]};
+$("clr").onclick=()=>{grid="0".repeat(DAYS*N);drawGrid()};
+function prefill(){const k=roomNum("room")+"|"+$("batch").value;if(k===loaded)return;loaded=k;const x=docs.find(d=>d.room+"|"+d.batch===k);if(x){grid=x.grid;drawGrid()}}
 $("room").onchange=$("batch").onchange=prefill;
-function store(){try{return JSON.parse(localStorage.getItem("fc")||"[]")}catch(e){return[]}}
-$("save").onclick=async()=>{const room=roomName(),batch=$("batch").value;
- if(!room){$("msg").textContent="Enter a valid UB room number (floors 5 to 14, e.g. 504 or 1230).";return}
- if(!batch){$("msg").textContent="Select your batch first.";return}  if(!/[12]/.test(grid)){$("msg").textContent="Your timetable grid is empty. Fill it in first (mark at least one cell Here or Not here).";return}  if(!window.langOk){window.langOk=1;$("msg").textContent="Check your language classes, then click Save timetable again.";alert(`Language classes reminder:
+$("save").onclick=async()=>{const n=roomNum("room"),b=$("batch").value;
+ if(!n)return $("msg").textContent=BADROOM;
+ if(!b)return $("msg").textContent="Select your batch.";
+ if(!/[12]/.test(grid))return $("msg").textContent="The grid is empty. Mark at least one cell.";
+ if(!db)return $("msg").textContent="Not connected. Try again in a bit.";
+ if(!langOk){langOk=true;$("msg").textContent="Check language classes, then press Save again.";
+  alert(`Language classes:\n\nIf you have a language class in UB ${n}, mark those periods Here.\nIf it's in another room, add that room's timetable too.\n\nThen press Save timetable again.`);return}
+ langOk=false;
+ try{await saveKey(n,"r"+n+"b"+b,grid);$("msg").textContent="Saved ✓"}catch(e){$("msg").textContent="Couldn't save ("+(e.code||e.message)+")."}};
 
-If you attend a language class in room ${room}, mark those periods as Here.
-If your language class is in a different room, add that room's timetable too and mark Here for those periods.
+/* ---------- start ---------- */
+const days=[...Array(DAYS)].map((_,i)=>`<option value="${i}">Day ${i+1}</option>`).join("");
+const pers=P.map((p,i)=>`<option value="${i}">P${i+1} (${p[0]}–${p[1]})</option>`).join("");
+$("fd").innerHTML=$("rd").innerHTML=days;$("fp").innerHTML=$("rpd").innerHTML=pers;
+{const n=new Date(),m=n.getHours()*60+n.getMinutes();let c=0;START.forEach((s,i)=>{if(m>=s)c=i});$("fp").value=$("rpd").value=c}
+$("fd").onchange=$("fp").onchange=render;
+drawGrid();render();
 
-Press OK, check your grid, then click Save timetable again.`);return}  window.langOk=0;
- const id=slug(room)+"__"+slug(batch),doc={room,batch,grid};
- try{if(db)await saveFloor(room,batch,grid);else{const s=store().filter(x=>x.id!==id);s.push({id,...doc});try{localStorage.setItem("fc",JSON.stringify(s))}catch(e){}docs=s;render()}
-  $("msg").textContent="Saved ✓"}catch(e){$("msg").textContent="Could not save: "+(e.message||e.code||"not allowed")+". You may need edit access."}};
-fill();drawGrid();render();
-(async()=>{try{db=shim}catch(e){}
- if(!db){$("bn").innerHTML='<div class="bn">Offline mode: data is saved only in this browser. Sign in on claude.ai to share with everyone.</div>';docs=store();render();return}
- db.collection("floors").onSnapshot(s=>{docs=parse(s.docs).filter(x=>x.grid&&x.grid.length===DAYS*N&&/^UB (([5-9]|1[0-4])([0-3][0-9]|40))$/.test(x.room));render()},e=>{$("bn").innerHTML='<div class="bn">Could not load shared data ('+esc(e.code||"error")+').</div>'})})();
+// Firebase loads last, so the page still works (empty) if it can't load
+(async()=>{try{
+ const [{initializeApp},f]=await Promise.all([import(APP),import(FST)]);
+ const fs=f.getFirestore(initializeApp(firebaseConfig));db={fs,doc:f.doc,getDoc:f.getDoc,setDoc:f.setDoc,updateDoc:f.updateDoc};
+ f.onSnapshot(f.collection(fs,"floors"),s=>{parse(s.docs);render()},e=>{$("bn").innerHTML=`<div class="bn">Couldn't load rooms (${e.code||"error"}).</div>`})
+}catch(e){$("bn").innerHTML='<div class="bn">Couldn\'t connect to the database, so nothing can be loaded or saved right now.</div>'}})();
 </script></body></html>
